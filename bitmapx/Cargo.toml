@@ -1,5 +1,5 @@
 [package]
-name = "bitmap"
+name = "bitmapx"
 version = "0.1.0"
 authors = ["Kohei Fujino <appleblueberrycherry@gmail.co.jp>"]
 edition = "2018"

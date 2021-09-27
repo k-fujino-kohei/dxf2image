@@ -1,7 +1,7 @@
 use crate::color::DxfColor;
 use crate::coord::{Coord, PointConverter};
 use dxf::entities::EntityType;
-use svg::{
+use svgx::{
     document::Document,
     nodes::{Circle, Line, Polyline},
 };

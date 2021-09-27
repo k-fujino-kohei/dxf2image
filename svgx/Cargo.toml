@@ -1,5 +1,5 @@
 [package]
-name = "svg"
+name = "svgx"
 version = "0.1.0"
 authors = ["Kohei Fujino <appleblueberrycherry@gmail.com>"]
 edition = "2018"

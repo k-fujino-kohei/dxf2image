@@ -27,7 +27,7 @@ mod dxf2svg;
 pub use dxf2svg::dxf2svg;
 
 #[cfg(feature = "png")]
-pub use bitmap::svg2png;
+pub use bitmapx::svg2png;
 
 #[cfg(feature = "png")]
 /// Convert dxf to png

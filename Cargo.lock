@@ -51,7 +51,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
-name = "bitmap"
+name = "bitmapx"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -200,9 +200,9 @@ name = "dxf2image"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "bitmap",
+ "bitmapx",
  "dxf",
- "svg 0.1.0",
+ "svgx",
 ]
 
 [[package]]
@@ -654,14 +654,6 @@ checksum = "fe0f37c9e8f3c5a4a66ad655a93c74daac4ad00c441533bf5c6e7990bb42604e"
 
 [[package]]
 name = "svg"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "svg 0.10.0",
-]
-
-[[package]]
-name = "svg"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e72d8b19ab05827afefcca66bf47040c1e66a0901eb814784c77d4ec118bd309"
@@ -683,6 +675,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dabb3eb59a457c56d5282ab4545609e2cc382b41f6af239bb8d59a7267ef94b3"
 dependencies = [
  "siphasher",
+]
+
+[[package]]
+name = "svgx"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "svg",
 ]
 
 [[package]]

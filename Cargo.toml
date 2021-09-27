@@ -15,9 +15,9 @@ repository = "https://github.com/k-fujino-kohei/dxf2image"
 [dependencies]
 anyhow = "1.0"
 dxf = { git = "https://github.com/ixmilia/dxf-rs", branch = "main" }
-svg = { path = "./svg", version = "0.1.0" }
-bitmap = { path = "./bitmap", version = "0.1.0", optional = true }
+svgx = { path = "./svgx", version = "0.1.0" }
+bitmapx = { path = "./bitmapx", version = "0.1.0", optional = true }
 
 [features]
 default = []
-png = ["bitmap"]
+png = ["bitmapx"]
