@@ -7,13 +7,13 @@ dxf2image is a fast and efficient dxf to image converter!
 Put the following in your `Cargo.toml`
 ``` toml
 [dependencies]
-dxf2image = "0.0.1"
+dxf2image = "0.1"
 ```
 
 If you want png, please add `png` to the features
 ``` toml
 [dependencies]
-dxf2image = { version = "0.0.1", features = ["png"] }
+dxf2image = { version = "0.1", features = ["png"] }
 ```
 
 ## Usage

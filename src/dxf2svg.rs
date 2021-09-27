@@ -6,6 +6,7 @@ use svg::{
     nodes::{Circle, Line, Polyline},
 };
 
+/// Convert dxf to svg
 pub fn dxf2svg(input_path: &str, output_path: &str) -> anyhow::Result<()> {
     let drawing = dxf::Drawing::load_file(input_path)?;
 

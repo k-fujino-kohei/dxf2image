@@ -1,3 +1,4 @@
+/// Convert svg to png
 pub fn svg2png(input_path: &str, output_path: &str) -> anyhow::Result<()> {
     let mut opt = usvg::Options::default();
     // Get file's absolute directory.

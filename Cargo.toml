@@ -3,6 +3,12 @@ name = "dxf2image"
 version = "0.1.0"
 authors = ["Kohei Fujino <appleblueberrycherry@gmail.com>"]
 edition = "2018"
+readme = "README.md"
+categories = ["multimedia::images", "rendering"]
+keywords = ["cad", "dxf", "svg", "png", "graphics"]
+license-file = "LICENSE"
+description = "dxf2image is a fast and efficient dxf to image converter!"
+repository = "https://github.com/k-fujino-kohei/dxf2image"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
