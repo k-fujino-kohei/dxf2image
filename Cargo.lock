@@ -188,7 +188,7 @@ dependencies = [
 
 [[package]]
 name = "dxf2image"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "dxf",
