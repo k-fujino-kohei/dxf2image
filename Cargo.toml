@@ -16,8 +16,10 @@ repository = "https://github.com/k-fujino-kohei/dxf2image"
 anyhow = "1.0"
 dxf = { version = "0.4" }
 svgx = { path = "./svgx", version = "0.1.0" }
-bitmapx = { path = "./bitmapx", version = "0.1.0", optional = true }
+resvg = { version = "0.18.0", optional = true }
+usvg = { version = "0.18.0", optional = true }
+tiny-skia = { version = "0.6.1", optional = true }
 
 [features]
 default = []
-png = ["bitmapx"]
+png = ["resvg", "usvg", "tiny-skia"]

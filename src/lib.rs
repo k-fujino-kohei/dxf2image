@@ -23,11 +23,13 @@
 mod color;
 mod coord;
 mod dxf2svg;
+#[cfg(feature = "png")]
+mod svg2png;
 
 pub use dxf2svg::dxf2svg;
 
 #[cfg(feature = "png")]
-pub use bitmapx::svg2png;
+pub use svg2png::svg2png;
 
 #[cfg(feature = "png")]
 /// Convert dxf to png
