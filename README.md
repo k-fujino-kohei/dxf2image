@@ -1,3 +1,5 @@
+[![Crates.io](https://img.shields.io/crates/v/dxf2image?style=for-the-badge)](https://crates.io/crates/dxf2image)
+
 # dxf2image
 
 dxf2image is a fast and efficient dxf to image converter!
