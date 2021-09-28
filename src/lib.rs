@@ -4,7 +4,7 @@
 //!
 //! ## Usage
 //!
-//! ```
+//! ``` no_run
 //! use dxf2image::{dxf2svg, dxf2png};
 //!
 //! fn main() {
