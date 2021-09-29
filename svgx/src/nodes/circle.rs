@@ -12,7 +12,9 @@ impl Node for Circle {
 
 impl Circle {
     pub fn new() -> Self {
-        Self(svg::node::element::Circle::new()).stroke("000000")
+        Self(svg::node::element::Circle::new())
+            .stroke("000000")
+            .fill("none")
     }
 
     pub fn center(&self, center: (f64, f64)) -> Self {
@@ -27,5 +29,9 @@ impl Circle {
 impl Circle {
     pub fn stroke(self, value: &str) -> Self {
         Self(self.0.set("stroke", format!(r"#{}", value)))
+    }
+
+    pub fn fill(self, value: &str) -> Self {
+        Self(self.0.set("fill", value))
     }
 }
