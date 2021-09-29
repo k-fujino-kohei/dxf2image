@@ -1,9 +1,9 @@
 use crate::color::DxfColor;
 use crate::coord::{Coord, PointConverter};
-use dxf::entities::EntityType;
+use dxf::entities::{Entity, EntityType};
 use svgx::{
     document::Document,
-    nodes::{Circle, Line, Polyline},
+    nodes::{Circle, Line, Path, Polyline},
 };
 
 /// Convert dxf to svg
@@ -22,53 +22,82 @@ pub fn dxf2svg(input_path: &str, output_path: &str) -> anyhow::Result<()> {
     );
 
     for entity in drawing.entities() {
-        let common = entity.common.clone();
-        let color = hex_color(&drawing, &common);
-
-        match &entity.specific {
-            EntityType::LwPolyline(polyline) => {
-                let polyline = polyline.clone();
-                let points: Vec<(f64, f64)> = polyline
-                    .vertices
-                    .into_iter()
-                    .map(|vertex| (coord.relative_to((vertex.x.clone(), vertex.y.clone()))))
-                    .collect();
-                let node = Polyline::new().points(points).stroke(&color);
-                document.add(node);
-            }
-            EntityType::Line(line) => {
-                let line = line.clone();
-                let from = coord.relative_to(line.p1);
-                let to = coord.relative_to(line.p2);
-                let node = Line::new().points(from, to).stroke(&color);
-                document.add(node);
-            }
-            EntityType::Leader(leader) => {
-                // TODO: use_arrowheads, spline
-                let leader = leader.clone();
-                let points = leader
-                    .vertices
-                    .into_iter()
-                    .map(|p| coord.relative_to(p))
-                    .collect();
-                let node = Polyline::new().points(points).stroke(&color);
-                document.add(node);
-            }
-            EntityType::Circle(circle) => {
-                let circle = circle.clone();
-                let node = Circle::new()
-                    .center(coord.relative_to(circle.center))
-                    .radius(coord.relative_to(circle.radius))
-                    .stroke(&color);
-                document.add(node);
-            }
-            _ => {
-                // TODO: support more entities;
-            }
-        }
+        entity_to_node(&mut document, &drawing, &coord, &entity);
     }
 
     document.save(output_path)
+}
+
+fn entity_to_node(document: &mut Document, drawing: &dxf::Drawing, coord: &Coord, entity: &Entity) {
+    let common = entity.common.clone();
+
+    let should_draw = drawing
+        .layers()
+        .find(|layer| layer.name == common.layer)
+        .map(|layer| layer.is_layer_plotted && layer.is_layer_on)
+        .unwrap_or(false);
+    if !should_draw {
+        return;
+    }
+
+    let color = hex_color(&drawing, &common);
+
+    match &entity.specific {
+        EntityType::LwPolyline(polyline) => {
+            let polyline = polyline.clone();
+            let points: Vec<(f64, f64)> = polyline
+                .vertices
+                .into_iter()
+                .map(|vertex| (coord.relative_to((vertex.x.clone(), vertex.y.clone()))))
+                .collect();
+            let node = Polyline::new().points(points).stroke(&color);
+            document.add(node);
+        }
+        EntityType::Line(line) => {
+            let line = line.clone();
+            let from = coord.relative_to(line.p1);
+            let to = coord.relative_to(line.p2);
+            let node = Line::new().points(from, to).stroke(&color);
+            document.add(node);
+        }
+        EntityType::Leader(leader) => {
+            // TODO: use_arrowheads, spline
+            let leader = leader.clone();
+            let points = leader
+                .vertices
+                .into_iter()
+                .map(|p| coord.relative_to(p))
+                .collect();
+            let node = Polyline::new().points(points).stroke(&color);
+            document.add(node);
+        }
+        EntityType::Circle(circle) => {
+            let circle = circle.clone();
+            let node = Circle::new()
+                .center(coord.relative_to(circle.center))
+                .radius(coord.relative_to(circle.radius))
+                .stroke(&color);
+            document.add(node);
+        }
+        EntityType::Arc(arc) => {
+            let arc = arc.clone();
+            let center = coord.relative_to(arc.center);
+            let radius = coord.relative_to(arc.radius);
+            let node = Path::arc(center, radius, arc.start_angle, arc.end_angle).stroke(&color);
+            document.add(node);
+        }
+        EntityType::Insert(insert) => {
+            if let Some(block) = drawing.blocks().find(|block| block.name == insert.name) {
+                let mut coord = coord.clone();
+                let base_point = (insert.location.x, insert.location.y);
+                coord.set_base_point(base_point);
+                for entity in block.entities.clone() {
+                    entity_to_node(document, &drawing, &coord, &entity);
+                }
+            }
+        }
+        _ => {}
+    }
 }
 
 fn hex_color(drawing: &dxf::Drawing, common: &dxf::entities::EntityCommon) -> String {

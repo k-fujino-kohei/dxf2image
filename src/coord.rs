@@ -1,9 +1,11 @@
+#[derive(Debug, Clone)]
 pub struct Coord {
     extmax_x: f64,
     extmax_y: f64,
     extmin_x: f64,
     extmin_y: f64,
     zoom_scale: f64,
+    base_point: (f64, f64),
 }
 
 impl Coord {
@@ -15,6 +17,7 @@ impl Coord {
             extmin_y: extmin.y,
             // FIXME: calculate the scale
             zoom_scale: 10.0,
+            base_point: (extmin.x, extmin.y),
         }
     }
 
@@ -22,8 +25,12 @@ impl Coord {
         (0.0, 0.0)
     }
 
+    pub fn set_base_point(&mut self, base_point: (f64, f64)) {
+        self.base_point = (base_point.0, base_point.1);
+    }
+
     pub fn base_point(&self) -> (f64, f64) {
-        (self.extmax_x, self.extmax_y)
+        self.base_point
     }
 
     pub fn width(&self) -> f64 {
@@ -43,9 +50,10 @@ pub trait PointConverter<P> {
 impl PointConverter<(f64, f64)> for Coord {
     type Output = (f64, f64);
     fn relative_to(&self, point: (f64, f64)) -> (f64, f64) {
+        let point = (point.0, point.1);
         (
-            (self.base_point().0 - point.0) / self.zoom_scale,
-            (self.base_point().1 - point.1) / self.zoom_scale,
+            (point.0 - self.base_point().0).abs() / self.zoom_scale,
+            (point.1 - self.base_point().1).abs() / self.zoom_scale,
         )
     }
 }
