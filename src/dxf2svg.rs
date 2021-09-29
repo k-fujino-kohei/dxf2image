@@ -21,7 +21,7 @@ pub fn dxf2svg(input_path: &str, output_path: &str) -> anyhow::Result<()> {
         coord.height(),
     );
 
-    for entity in drawing.entities.clone() {
+    for entity in drawing.entities() {
         let common = entity.common.clone();
         let color = hex_color(&drawing, &common);
 
@@ -74,8 +74,7 @@ pub fn dxf2svg(input_path: &str, output_path: &str) -> anyhow::Result<()> {
 fn hex_color(drawing: &dxf::Drawing, common: &dxf::entities::EntityCommon) -> String {
     let color_idx = if common.color.is_by_layer() {
         drawing
-            .layers
-            .iter()
+            .layers()
             .find(|layer| layer.name == common.layer)
             .map(|layer| layer.color.index())
             .flatten()
