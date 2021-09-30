@@ -12,7 +12,7 @@ pub fn dxf2svg(input_path: &str, output_path: &str) -> anyhow::Result<()> {
 
     let extmax = drawing.header.maximum_drawing_extents.clone();
     let extmin = drawing.header.minimum_drawing_extents.clone();
-    let coord = Coord::new(extmax, extmin);
+    let coord = Coord::new(extmax, extmin, Some(3000.0));
 
     let mut document = Document::new().viewbox(
         coord.origin().0,

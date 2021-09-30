@@ -4,20 +4,35 @@ pub struct Coord {
     extmax_y: f64,
     extmin_x: f64,
     extmin_y: f64,
-    zoom_scale: f64,
+    scale_factor: f64,
     base_point: (f64, f64),
+    original_width: f64,
+    original_height: f64,
 }
 
 impl Coord {
-    pub fn new(extmax: dxf::Point, extmin: dxf::Point) -> Self {
+    pub fn new(extmax: dxf::Point, extmin: dxf::Point, max_length: Option<f64>) -> Self {
+        let width = (extmax.x - extmin.x).abs();
+        let height = (extmax.y - extmin.y).abs();
+        let scale_factor = max_length
+            .map(|max_length| {
+                (width.max(height), max_length)
+            })
+            .filter(|(long_length, max_length)| long_length > max_length)
+            .map(|(long_length, max_length)| {
+                long_length / max_length
+            })
+            .unwrap_or(1.0);
+
         Self {
             extmax_x: extmax.x,
             extmax_y: extmax.y,
             extmin_x: extmin.x,
             extmin_y: extmin.y,
-            // FIXME: calculate the scale
-            zoom_scale: 10.0,
-            base_point: (extmin.x, extmin.y),
+            scale_factor,
+            base_point: (extmin.x, extmax.y),
+            original_width: width,
+            original_height: height,
         }
     }
 
@@ -34,11 +49,11 @@ impl Coord {
     }
 
     pub fn width(&self) -> f64 {
-        (self.extmax_x - self.extmin_x).abs() / self.zoom_scale
+        self.original_width / self.scale_factor
     }
 
     pub fn height(&self) -> f64 {
-        (self.extmax_y - self.extmin_y).abs() / self.zoom_scale
+        self.original_height / self.scale_factor
     }
 }
 
@@ -52,8 +67,8 @@ impl PointConverter<(f64, f64)> for Coord {
     fn relative_to(&self, point: (f64, f64)) -> (f64, f64) {
         let point = (point.0, point.1);
         (
-            (point.0 - self.base_point().0).abs() / self.zoom_scale,
-            (point.1 - self.base_point().1).abs() / self.zoom_scale,
+            (point.0 - self.base_point().0).abs() / self.scale_factor,
+            (point.1 - self.base_point().1).abs() / self.scale_factor,
         )
     }
 }
@@ -68,6 +83,6 @@ impl PointConverter<dxf::Point> for Coord {
 impl PointConverter<f64> for Coord {
     type Output = f64;
     fn relative_to(&self, length: f64) -> f64 {
-        length / self.zoom_scale
+        length / self.scale_factor
     }
 }
