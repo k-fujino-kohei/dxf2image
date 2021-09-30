@@ -15,6 +15,7 @@ impl Polyline {
         Self(svg::node::element::Polyline::new())
             .stroke_width(1)
             .stroke("000000")
+            .fill("none")
     }
 
     pub fn points(self, value: Vec<(f64, f64)>) -> Self {
@@ -29,5 +30,9 @@ impl Polyline {
 
     pub fn stroke(self, value: &str) -> Self {
         Self(self.0.set("stroke", format!(r"#{}", value)))
+    }
+
+    pub fn fill(self, value: &str) -> Self {
+        Self(self.0.set("fill", value))
     }
 }
