@@ -8,6 +8,8 @@ pub struct Coord {
     base_point: (f64, f64),
     original_width: f64,
     original_height: f64,
+    /// origin of all drawing extents
+    origin: (f64, f64),
 }
 
 impl Coord {
@@ -33,15 +35,15 @@ impl Coord {
             base_point: (extmin.x, extmax.y),
             original_width: width,
             original_height: height,
+            origin: (extmin.x, extmax.y)
         }
     }
 
-    pub fn origin(&self) -> (f64, f64) {
-        (0.0, 0.0)
-    }
-
     pub fn set_base_point(&mut self, base_point: (f64, f64)) {
-        self.base_point = (base_point.0, base_point.1);
+        self.base_point = (
+            (self.origin.0 - base_point.0).abs(),
+            (self.origin.1 - base_point.1).abs(),
+        );
     }
 
     pub fn base_point(&self) -> (f64, f64) {

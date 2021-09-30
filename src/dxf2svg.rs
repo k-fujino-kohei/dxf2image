@@ -14,12 +14,7 @@ pub fn dxf2svg(input_path: &str, output_path: &str) -> anyhow::Result<()> {
     let extmin = drawing.header.minimum_drawing_extents.clone();
     let coord = Coord::new(extmax, extmin, Some(3000.0));
 
-    let mut document = Document::new().viewbox(
-        coord.origin().0,
-        coord.origin().1,
-        coord.width(),
-        coord.height(),
-    );
+    let mut document = Document::new().viewbox(0.0, 0.0, coord.width(), coord.height());
 
     for entity in drawing.entities() {
         entity_to_node(&mut document, &drawing, &coord, &entity);
