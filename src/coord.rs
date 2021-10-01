@@ -17,13 +17,9 @@ impl Coord {
         let width = (extmax.x - extmin.x).abs();
         let height = (extmax.y - extmin.y).abs();
         let scale_factor = max_length
-            .map(|max_length| {
-                (width.max(height), max_length)
-            })
+            .map(|max_length| (width.max(height), max_length))
             .filter(|(long_length, max_length)| long_length > max_length)
-            .map(|(long_length, max_length)| {
-                long_length / max_length
-            })
+            .map(|(long_length, max_length)| long_length / max_length)
             .unwrap_or(1.0);
 
         Self {
@@ -35,7 +31,7 @@ impl Coord {
             base_point: (extmin.x, extmax.y),
             original_width: width,
             original_height: height,
-            origin: (extmin.x, extmax.y)
+            origin: (extmin.x, extmax.y),
         }
     }
 
