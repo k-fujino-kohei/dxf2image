@@ -1,6 +1,7 @@
 use crate::color::DxfColor;
 use crate::coord::{Coord, PointConverter};
 use dxf::entities::{Entity, EntityType};
+use dxf::enums::AngleDirection;
 use svgx::{
     document::Document,
     nodes::{Circle, Line, Path, Polyline},
@@ -78,7 +79,9 @@ fn entity_to_node(document: &mut Document, drawing: &dxf::Drawing, coord: &Coord
             let arc = arc.clone();
             let center = coord.relative_to(arc.center);
             let radius = coord.relative_to(arc.radius);
-            let node = Path::arc(center, radius, arc.start_angle, arc.end_angle).stroke(&color);
+            let is_clockwise = drawing.header.angle_direction == AngleDirection::Clockwise;
+            let node = Path::arc(center, radius, arc.start_angle, arc.end_angle, is_clockwise)
+                .stroke(&color);
             document.add(node);
         }
         EntityType::Insert(insert) => {
