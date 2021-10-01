@@ -13,7 +13,7 @@ impl Node for Polyline {
 impl Polyline {
     pub fn new() -> Self {
         Self(svg::node::element::Polyline::new())
-            .stroke_width(1)
+            .stroke_width(1.0)
             .stroke("000000")
             .fill("none")
     }
@@ -24,7 +24,7 @@ impl Polyline {
 }
 
 impl Polyline {
-    pub fn stroke_width(self, value: usize) -> Self {
+    pub fn stroke_width(self, value: f64) -> Self {
         Self(self.0.set("stroke-width", value))
     }
 

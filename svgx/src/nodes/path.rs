@@ -16,7 +16,7 @@ impl Node for Path {
 impl Path {
     pub fn new() -> Self {
         Self(svg::node::element::Path::new())
-            .stroke_width(1)
+            .stroke_width(1.0)
             .stroke("#FFFFFF")
             .fill("none")
     }
@@ -70,7 +70,7 @@ impl Path {
 }
 
 impl Path {
-    pub fn stroke_width(self, value: usize) -> Self {
+    pub fn stroke_width(self, value: f64) -> Self {
         Self(self.0.set("stroke-width", value))
     }
 

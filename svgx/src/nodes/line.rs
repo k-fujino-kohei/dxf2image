@@ -13,7 +13,7 @@ impl Node for Line {
 impl Line {
     pub fn new() -> Self {
         Self(svg::node::element::Line::new())
-            .stroke_width(1)
+            .stroke_width(1.0)
             .stroke("000000")
     }
 
@@ -31,7 +31,7 @@ impl Line {
 
 // TODO: DRY
 impl Line {
-    pub fn stroke_width(self, value: usize) -> Self {
+    pub fn stroke_width(self, value: f64) -> Self {
         Self(self.0.set("stroke-width", value))
     }
 
