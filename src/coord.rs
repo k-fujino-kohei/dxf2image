@@ -14,8 +14,8 @@ pub struct Coord {
 
 impl Coord {
     pub fn new(extmax: dxf::Point, extmin: dxf::Point, max_length: Option<f64>) -> Self {
-        let width = (extmax.x - extmin.x).abs();
-        let height = (extmax.y - extmin.y).abs();
+        let width = (extmax.x - extmin.x).powi(2).sqrt();
+        let height = (extmax.y - extmin.y).powi(2).sqrt();
         let scale_factor = max_length
             .map(|max_length| (width.max(height), max_length))
             .filter(|(long_length, max_length)| long_length > max_length)
@@ -63,10 +63,10 @@ pub trait PointConverter<P> {
 impl PointConverter<(f64, f64)> for Coord {
     type Output = (f64, f64);
     fn relative_to(&self, point: (f64, f64)) -> (f64, f64) {
-        let point = (point.0, point.1);
+        let (x, y) = (point.0, point.1);
         (
-            (point.0 - self.base_point().0).abs() / self.scale_factor,
-            (point.1 - self.base_point().1).abs() / self.scale_factor,
+            (x - self.base_point().0).abs() / self.scale_factor,
+            (y - self.base_point().1).abs() / self.scale_factor,
         )
     }
 }
