@@ -1,26 +1,9 @@
 use std::f64::consts::PI;
 use svg::node::element::path::Data;
 
-use super::Node;
-
-pub struct Path(svg::node::element::Path);
-
-impl Node for Path {
-    type Element = svg::node::element::Path;
-
-    fn to_element(self) -> Self::Element {
-        self.0
-    }
-}
+use super::Path;
 
 impl Path {
-    pub fn new() -> Self {
-        Self(svg::node::element::Path::new())
-            .stroke_width(1.0)
-            .stroke("#FFFFFF")
-            .fill("none")
-    }
-
     pub fn arc(
         center: (f64, f64),
         radius: f64,
@@ -66,19 +49,5 @@ impl Path {
         U: Into<svg::node::Value>,
     {
         Self(self.0.set("d", data))
-    }
-}
-
-impl Path {
-    pub fn stroke_width(self, value: f64) -> Self {
-        Self(self.0.set("stroke-width", value))
-    }
-
-    pub fn stroke(self, value: &str) -> Self {
-        Self(self.0.set("stroke", format!(r"#{}", value)))
-    }
-
-    pub fn fill(self, value: &str) -> Self {
-        Self(self.0.set("fill", value))
     }
 }
