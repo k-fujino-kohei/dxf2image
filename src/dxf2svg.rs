@@ -1,5 +1,5 @@
 use crate::color::DxfColor;
-use crate::coord::{Coord, PointConverter};
+use crate::coord::{Coord, PointConverter, Position};
 use dxf::entities::{Entity, EntityType};
 use dxf::enums::AngleDirection;
 use svgx::nodes::Ellipse;
@@ -100,10 +100,10 @@ fn entity_to_node(document: &mut Document, drawing: &dxf::Drawing, coord: &Coord
         }
         EntityType::Insert(insert) => {
             if let Some(block) = drawing.blocks().find(|block| block.name == insert.name) {
-                println!("`block` is unstabled.");
                 let mut coord = coord.clone();
                 let base_point = (insert.location.x, insert.location.y);
-                coord.set_base_point(base_point);
+                // Entities in a block will be relative to the block's base point.
+                coord.set_base_point(base_point, Position::Relative);
                 for entity in block.entities.clone() {
                     entity_to_node(document, &drawing, &coord, &entity);
                 }
