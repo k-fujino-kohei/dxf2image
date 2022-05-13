@@ -1,12 +1,13 @@
 use crate::color::DxfColor;
 use crate::coord::{Coord, PointConverter, Position};
+use anyhow::{anyhow, bail};
 use dxf::entities::{Entity, EntityType};
-use dxf::enums::AngleDirection;
-use svgx::nodes::Ellipse;
+use dxf::enums::{AngleDirection, HorizontalTextJustification};
 use svgx::{
     document::Document,
-    nodes::{Circle, Line, Path, Polyline, Text},
+    nodes::{Circle, Line, Path, Polyline, Text, Ellipse, values::*},
 };
+use std::ops::Mul;
 
 /// Convert dxf to svg
 pub fn dxf2svg(input_path: &str, output_path: &str) -> anyhow::Result<()> {
@@ -19,13 +20,13 @@ pub fn dxf2svg(input_path: &str, output_path: &str) -> anyhow::Result<()> {
     let mut document = Document::new().viewbox(0.0, 0.0, coord.width(), coord.height());
 
     for entity in drawing.entities() {
-        entity_to_node(&mut document, &drawing, &coord, &entity);
+        entity_to_node(&mut document, &drawing, &coord, entity)?;
     }
 
     document.save(output_path)
 }
 
-fn entity_to_node(document: &mut Document, drawing: &dxf::Drawing, coord: &Coord, entity: &Entity) {
+fn entity_to_node(document: &mut Document, drawing: &dxf::Drawing, coord: &Coord, entity: &Entity) -> anyhow::Result<()> {
     let common = entity.common.clone();
 
     let should_draw = drawing
@@ -34,10 +35,10 @@ fn entity_to_node(document: &mut Document, drawing: &dxf::Drawing, coord: &Coord
         .map(|layer| layer.is_layer_plotted && layer.is_layer_on)
         .unwrap_or(false);
     if !should_draw {
-        return;
+        return Ok(());
     }
 
-    let color = hex_color(&drawing, &common);
+    let color = hex_color(drawing, &common);
     let org_line_weight = line_weight(drawing, &common);
     let line_weight = coord.relative_to(org_line_weight as f64);
 
@@ -47,7 +48,7 @@ fn entity_to_node(document: &mut Document, drawing: &dxf::Drawing, coord: &Coord
             let points: Vec<(f64, f64)> = polyline
                 .vertices
                 .into_iter()
-                .map(|vertex| (coord.relative_to((vertex.x.clone(), vertex.y.clone()))))
+                .map(|vertex| (coord.relative_to((vertex.x, vertex.y))))
                 .collect();
             let node = Polyline::new()
                 .points(points)
@@ -105,7 +106,7 @@ fn entity_to_node(document: &mut Document, drawing: &dxf::Drawing, coord: &Coord
                 // Entities in a block will be relative to the block's base point.
                 coord.set_base_point(base_point, Position::Relative);
                 for entity in block.entities.clone() {
-                    entity_to_node(document, &drawing, &coord, &entity);
+                    entity_to_node(document, drawing, &coord, &entity)?;
                 }
             } else {
                 println!("not found the block: {}.", insert.name);
@@ -114,11 +115,48 @@ fn entity_to_node(document: &mut Document, drawing: &dxf::Drawing, coord: &Coord
         EntityType::Text(text) => {
             let text = text.clone();
             let points = coord.relative_to(text.location);
-            let node = Text::new()
+            let height = coord.relative_to(text.text_height);
+            let end_points = coord.relative_to(text.second_alignment_point);
+            // FIXME: adjust v/h position.
+            // http://docs.autodesk.com/ACD/2011/JPN/filesDXF/WS1a9193826455f5ff18cb41610ec0a2e719-79d1.htm
+            let anchor: TextAnchor = match text.horizontal_text_justification {
+                HorizontalTextJustification::Left => TextAnchor::Start,
+                HorizontalTextJustification::Center => TextAnchor::Middle,
+                HorizontalTextJustification::Right => TextAnchor::End,
+                HorizontalTextJustification::Aligned => TextAnchor::Start,
+                HorizontalTextJustification::Middle => TextAnchor::Middle,
+                HorizontalTextJustification::Fit => TextAnchor::Start,
+            };
+            let length: Option<f64> = if let TextAnchor::Start = anchor {
+                None
+            } else {
+                Some((end_points.0 - points.0).abs().mul(2.0))
+            };
+
+            let (value, decoration) = {
+                let v = text.value.as_str();
+                if v.starts_with("%%U") {
+                    let mut chars = v.chars();
+                    chars.next();
+                    chars.next();
+                    chars.next();
+                    (chars.as_str(), "underline")
+                } else {
+                    (v, "none")
+                }
+            };
+
+            let mut node = Text::new()
                 .points(points)
-                .content(&text.value)
-                .font_size(org_line_weight as f64)
+                // .text_anchor(anchor)
+                .text_decoration(decoration)
+                .content(value)
+                .font_size(height)
+                .fill(&color)
                 .stroke(&color);
+            if let Some(length) = length {
+                node = node.text_length(length);
+            }
             document.add(node);
         }
         EntityType::Ellipse(ellipse) => {
@@ -146,6 +184,7 @@ fn entity_to_node(document: &mut Document, drawing: &dxf::Drawing, coord: &Coord
             // println!("{:?}", _t)
         }
     }
+    Ok(())
 }
 
 // fn interpolate_spline(t: i64, degree: f64, points: &[&[f64]], knots: &[f64]) {
@@ -168,11 +207,17 @@ fn hex_color(drawing: &dxf::Drawing, common: &dxf::entities::EntityCommon) -> St
 fn line_weight(drawing: &dxf::Drawing, common: &dxf::entities::EntityCommon) -> i16 {
     let by_layer = common.lineweight_enum_value == 0;
     let line_weight = if by_layer {
-        drawing
+        let res = drawing
             .layers()
             .find(|layer| layer.name == common.layer)
             .map(|layer| layer.line_weight.to_owned().get_raw_value())
-            .unwrap_or_default()
+            .unwrap_or_default();
+        if res == -3 {
+            // default 0.25mm
+            25
+        } else {
+            res
+        }
     } else {
         common.lineweight_enum_value
     };

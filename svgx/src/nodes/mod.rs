@@ -5,6 +5,10 @@ mod path;
 mod polyline;
 mod text;
 
+pub mod values {
+    pub use super::text::TextAnchor;
+}
+
 pub trait Node {
     type Element: svg::Node;
     fn to_element(self) -> Self::Element;
@@ -45,7 +49,7 @@ macro_rules! define_node {
             }
 
             pub fn fill(self, value: &str) -> Self {
-                Self(self.0.set("fill", value))
+                Self(self.0.set("fill", format!(r"#{}", value)))
             }
         }
     };
